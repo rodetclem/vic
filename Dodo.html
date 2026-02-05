@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+
+    button.story-btn {
+      margin: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+    #story-info {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      max-width: 400px;
+      display: none;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      color: black
+    }
+    #story-info h3 {
+      margin-top: 0;
+    }
+    #play-button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+    }
+    #play-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+<body>
+    <header>
+
+        <div class="headergrid">
+            <div onclick="window.location.replace('index.html')">
+                Home
+            </div>
+            <div onclick="window.location.replace('soundboard.html')">
+                Sons
+            </div>
+            <div onclick="window.location.replace('photos.html')" >
+                Photos
+            </div>
+            <div onclick="window.location.replace('Dodo.html')">
+                Histoires
+            </div>
+        </div>
+    </header>
+
+      <h2>Select a Story</h2>
+        <button class="story-btn" data-story="story1">Story 1</button>
+
+
+        <div id="story-info">
+            <h3 id="story-title"></h3>
+            <p><strong>Length:</strong> <span id="story-length"></span></p>
+            <p><strong>About:</strong> <span id="story-about"></span></p>
+            <p><strong>Theme:</strong> <span id="story-theme"></span></p>
+            <audio id="audio-player" controls style="display:block;"></audio>
+        </div>
+<script>
+    const stories = {
+      story1: {
+        title: "Clara en provence",
+        length: "7:43s",
+        about: "Clara decide d'aller en provence pour la première fois, et découvre cette region magnifique.",
+        theme: "Voyage, tout est bien qui se fini bien",
+        audioSrc: "story1.m4a"
+      },
+
+    };
+
+    const buttons = document.querySelectorAll('.story-btn');
+    const storyInfo = document.getElementById('story-info');
+    const titleElem = document.getElementById('story-title');
+    const lengthElem = document.getElementById('story-length');
+    const aboutElem = document.getElementById('story-about');
+    const themeElem = document.getElementById('story-theme');
+    const playButton = document.getElementById('play-button');
+    const audioPlayer = document.getElementById('audio-player');
+
+    let currentAudioSrc = "";
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const storyKey = button.getAttribute('data-story');
+        const story = stories[storyKey];
+
+        titleElem.textContent = story.title;
+        lengthElem.textContent = story.length;
+        aboutElem.textContent = story.about;
+        themeElem.textContent = story.theme;
+
+        // Show the info box
+        if (storyInfo.style.display == 'block'){
+            storyInfo.style.display = 'none';
+        } else {
+            storyInfo.style.display = 'block';
+        }
+
+        // Setup audio src
+        if (currentAudioSrc !== story.audioSrc) {
+          audioPlayer.src = story.audioSrc;
+          currentAudioSrc = story.audioSrc;
+          audioPlayer.load();
+        }
+      });
+    });
+
+    
+  </script>
+
+</body>
+</html>

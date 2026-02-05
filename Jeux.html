@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<style>
+    .games {
+        margin: 10%;
+        display: grid; 
+        grid-template-rows: auto;
+        
+    }
+</style>
+<body>
+    <header>
+        <div class="headergrid">
+            <div onclick="window.location.replace('index.html')">
+                Home
+            </div>
+            <div onclick="window.location.replace('soundboard.html')">
+                Sons
+            </div>
+            <div onclick="window.location.replace('photos.html')" >
+                Photos
+            </div>
+            <div onclick="window.location.replace('Dodo.html')">
+                Histoires
+            </div>
+        </div>
+    </header>
+
+    <div class="games">
+        <button onclick="window.open('game1.html')">Tic Tac Toe avec une IA</button>
+        <button onclick="window.open('game.html')">Tape le coeur</button>
+    </div>
+    
+</body>
+</html>

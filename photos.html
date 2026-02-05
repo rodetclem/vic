@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Galerie de Photos</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Style for button */
+  #openGalleryBtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  /* Hidden gallery style */
+  #gallery {
+    display: none;
+    margin-top: 20px;
+    max-width: 800px;
+  }
+  /* Gallery grid */
+  .gallery-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  /* Each photo */
+  .gallery-item {
+    flex: 1 0 21%; /* Four photos per row */
+    overflow: hidden;
+    border-radius: 5px;
+    position: relative;
+    height: 150px; /* Fixed height for consistent cropping */
+  }
+  .gallery-item img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    object-fit: cover; /* Ensures coverage for cropping */
+  }
+</style>
+</head>
+<body>
+
+   <header>
+        
+        <div class="headergrid">
+            <div onclick="window.location.replace('index.html')">
+                Home
+            </div>
+            <div onclick="window.location.replace('soundboard.html')">
+                Sons
+            </div>
+            <div onclick="window.location.replace('photos.html')" >
+                Photos
+            </div>
+            <div onclick="window.location.replace('Dodo.html')">
+                Histoires
+            </div>
+        </div>
+        
+    </header>
+
+<button id="openGalleryBtn">Voir</button>
+
+<div id="gallery">
+  <div class="gallery-grid">
+    <div class="gallery-item"><img src="ph1.jpeg" alt="Photo 1" /></div>
+    <div class="gallery-item"><img src="ph2.jpeg" alt="Photo 2" /></div>
+    <div class="gallery-item"><img src="ph3.jpeg" alt="Photo 3" /></div>
+    <div class="gallery-item"><img src="ph4.PNG" alt="Photo 4" /></div>
+    <div class="gallery-item"><img src="ph5.jpeg" alt="Photo 5" /></div>
+    <!-- Add more photos as needed -->
+  </div>
+</div>
+
+<script>
+  document.getElementById('openGalleryBtn').addEventListener('click', function() {
+    var gallery = document.getElementById('gallery');
+    // Toggle gallery visibility
+    if (gallery.style.display === 'none' || gallery.style.display === '') {
+      gallery.style.display = 'block';
+      this.textContent = 'Cacher';
+    } else {
+      gallery.style.display = 'none';
+      this.textContent = 'Voir';
+    }
+  });
+</script>
+
+</body>
+</html>

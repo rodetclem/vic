@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic Tac Toe</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    margin-top: 20px;
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    justify-content: center;
+    margin: 20px auto;
+  }
+  .cell {
+    background-color: white;
+    border: 2px solid #333;
+    font-size: 3rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .cell:hover {
+    background-color: #e0e0e0;
+  }
+  #status {
+    font-size: 1.5rem;
+    margin-top: 15px;
+  }
+  #reset {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h1>Tic Tac Toe vs IA</h1>
+<div id="board">
+  <div class="cell" data-index="0"></div>
+  <div class="cell" data-index="1"></div>
+  <div class="cell" data-index="2"></div>
+  <div class="cell" data-index="3"></div>
+  <div class="cell" data-index="4"></div>
+  <div class="cell" data-index="5"></div>
+  <div class="cell" data-index="6"></div>
+  <div class="cell" data-index="7"></div>
+  <div class="cell" data-index="8"></div>
+</div>
+<div id="status">Ton tour (X)</div>
+<button id="reset">Restart</button>
+
+<script>
+  const board = Array(9).fill(null);
+  const human = 'X';
+  const ai = 'O';
+  let gameOver = false;
+
+  const cells = document.querySelectorAll('.cell');
+  const statusDiv = document.getElementById('status');
+  const resetBtn = document.getElementById('reset');
+
+  function checkWinner(board, player) {
+    const winCombos = [
+      [0,1,2], [3,4,5], [6,7,8], // rows
+      [0,3,6], [1,4,7], [2,5,8], // cols
+      [0,4,8], [2,4,6]           // diagonals
+    ];
+    return winCombos.some(combo =>
+      combo.every(index => board[index] === player)
+    );
+  }
+
+  function availableMoves(board) {
+    return board.map((val,index) => val === null ? index : null).filter(v => v !== null);
+  }
+
+  function isDraw(board) {
+    return board.every(cell => cell !== null);
+  }
+
+  function minimax(newBoard, player) {
+    if (checkWinner(newBoard, human)) {
+      return {score: -10};
+    } else if (checkWinner(newBoard, ai)) {
+      return {score: 10};
+    } else if (isDraw(newBoard)) {
+      return {score: 0};
+    }
+
+    const moves = [];
+    const availSpots = availableMoves(newBoard);
+
+    for (let i = 0; i < availSpots.length; i++) {
+      const move = {};
+      move.index = availSpots[i];
+      newBoard[availSpots[i]] = player;
+
+      if (player === ai) {
+        let result = minimax(newBoard, human);
+        move.score = result.score;
+      } else {
+        let result = minimax(newBoard, ai);
+        move.score = result.score;
+      }
+
+      newBoard[availSpots[i]] = null;
+      moves.push(move);
+    }
+
+    let bestMove;
+    if (player === ai) {
+      let bestScore = -Infinity;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score > bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
+        }
+      }
+    } else {
+      let bestScore = Infinity;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score < bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
+        }
+      }
+    }
+    return moves[bestMove];
+  }
+
+  function makeMove(index, player) {
+    if (board[index] === null && !gameOver) {
+      board[index] = player;
+      cells[index].textContent = player;
+
+      if (checkWinner(board, player)) {
+        gameOver = true;
+        statusDiv.textContent = (player === human ? 'Ta gagné 🎉' : 'Ta perdu 😞');
+        return;
+      } else if (isDraw(board)) {
+        gameOver = true;
+        statusDiv.textContent = 'Egalité 🤝';
+        return;
+      }
+
+      if (player === human) {
+        statusDiv.textContent = "IA (O)";
+        setTimeout(() => {
+          const aiMove = minimax(board, ai);
+          makeMove(aiMove.index, ai);
+          if (!gameOver) {
+            statusDiv.textContent = "Ton tour (X)";
+          }
+        }, 500);
+      }
+    }
+  }
+
+  cells.forEach(cell => {
+    cell.addEventListener('click', () => {
+      if (!gameOver) {
+        makeMove(parseInt(cell.dataset.index), human);
+      }
+    });
+  });
+
+  resetBtn.addEventListener('click', () => {
+    for (let i = 0; i < board.length; i++) {
+      board[i] = null;
+      cells[i].textContent = '';
+    }
+    gameOver = false;
+    statusDiv.textContent = "Ton tour (X)";
+  });
+</script>
+</body>
+</html>

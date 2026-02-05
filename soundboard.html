@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Je t'aime</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        .btGrid {
+            display: grid;
+            grid-template-columns: 0.5fr 0.5fr 0.5fr;
+            column-gap: 10%;
+            row-gap: 40%;
+            padding: 50px;
+            
+        }
+        .btGrid button {
+            background-color:white;
+            border: none;
+            color: palevioletred;
+            border-width: 1px;
+            border-radius: 10px;
+            padding: 10%;
+            box-shadow: 0px 0px 10px palevioletred;
+        }
+        .btGrid button:hover {
+            box-shadow: none;
+            transition-duration: 0.3s;
+            cursor: pointer;
+
+        }
+
+    </style>
+</head>
+<audio id="jtmSound">
+    <source src='jtmSound1.m4a'>
+</audio>
+<audio id="jtm+">
+    <source src='jtm(+).m4a'>
+</audio>
+<audio id="jtm++">
+    <source src='jtm++.m4a'>
+</audio>
+<audio id="tmm">
+    <source src='tmm.m4a'>
+</audio>
+<audio id="bisous">
+    <source src="bisous.m4a">
+</audio>
+<body>
+    <header>
+        
+        <div class="headergrid">
+            <div onclick="window.location.replace('index.html')">
+                Home
+            </div>
+            <div onclick="window.location.replace('soundboard.html')">
+                Sons
+            </div>
+            <div onclick="window.location.replace('photos.html')" >
+                Photos
+            </div>
+            <div onclick="window.location.replace('Dodo.html')">
+                Histoires
+            </div>
+        </div>
+        
+    </header>
+    <div class="btGrid">
+        <button onclick="playjtm()">Je t'aime</button>
+        <button onclick="playjtmPlus()">Je t'aime x 100</button>
+        <button onclick="playjtmPP()">Je t'aime ++</button>
+        <button onclick="playtmm()">Tu me manques</button>
+        <button onclick="playbisous()">Gros bisous</button>
+
+
+    </div>
+    <script>
+        var x1 = document.getElementById("jtmSound");
+        var x2 = document.getElementById("jtm+");
+        var x3 = document.getElementById("jtm++");
+        var x4 = document.getElementById("tmm");
+        var x5 = document.getElementById("bisous");
+        function playjtm() {
+            x1.play();
+        }
+        function playjtmPlus() {
+            x2.play();
+        }
+        function playjtmPP() {
+            x3.play()
+        }
+        function playtmm() {
+            x4.play()
+        }
+        function playbisous() {
+            x5.play()
+        }
+
+    </script>
+</body>
+</html>

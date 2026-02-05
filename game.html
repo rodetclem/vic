@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Click le coeur</title>
+  <style>
+    :root{
+      --bg:#0f1724; /* dark navy */
+      --card:#0b1220;
+      --accent:#ff6b8a;
+      --muted:#94a3b8;
+      --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background:linear-gradient(180deg,var(--bg),#071024);
+      color:#e6eef8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .wrap{
+      width:100%;
+      max-width:920px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 10px 30px rgba(2,6,23,0.6);
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:18px;
+    }
+    h1{margin:0 0 6px 0; font-size:20px}
+    .panel{background:var(--card); padding:14px; border-radius:12px}
+    .controls{display:flex; gap:10px; align-items:center; margin-top:8px}
+    button{background:var(--accent); border:0; color:white; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600}
+    button.secondary{background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted)}
+    .meta{display:flex; gap:12px; margin-top:12px; align-items:center}
+    .stat{display:flex;flex-direction:column; align-items:flex-start}
+    .stat .num{font-size:28px; font-weight:700}
+
+    /* Game area */
+    .game-area{
+      position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+      border-radius:12px;
+      min-height:380px;
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      touch-action: manipulation;
+    }
+    .arena{
+      position:relative; width:100%; height:100%;
+    }
+    .heart{
+      position:absolute; width:84px; height:84px; display:flex; align-items:center; justify-content:center;
+      transform-origin:center;
+      user-select:none; -webkit-user-select:none;
+      cursor:pointer;
+      transition: transform 200ms cubic-bezier(.2,.9,.3,1), left 350ms ease, top 350ms ease, opacity 200ms;
+      will-change: left, top, transform, opacity;
+      font-size: xx-large;
+    }
+    .heart svg{width:100%; height:100%; display:block}
+    .heart:active{transform:scale(0.92) rotate(-8deg)}
+
+    .pop{animation:pop 360ms cubic-bezier(.22,.9,.35,1) forwards}
+    @keyframes pop{
+      0%{transform:scale(1)}
+      40%{transform:scale(1.25) rotate(-6deg)}
+      100%{transform:scale(1)}
+    }
+
+    .hud{
+      position:absolute; left:12px; top:12px; background:var(--glass); padding:8px 10px; border-radius:10px; font-weight:600;
+    }
+
+    /* little particle (for clicks) */
+    .particle{
+      position:absolute; pointer-events:none; font-size:14px; transform:translate(-50%,-50%);
+      animation:floatUp 800ms ease-out forwards;
+    }
+    @keyframes floatUp{
+      0%{opacity:1; transform:translate(-50%,-50%) translateY(0) scale(1)}
+      100%{opacity:0; transform:translate(-50%,-140%) translateY(-40px) scale(1.1)}
+    }
+
+    footer.small{font-size:12px; color:var(--muted); margin-top:10px}
+
+    /* Responsive */
+    @media (max-width:880px){
+      .wrap{grid-template-columns:1fr;}
+      .panel{padding:12px}
+      .game-area{min-height:360px}
+      .heart{width:72px;height:72px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>Click le coeur</h1>
+      <div class="meta">
+        <div class="stat">
+          <div class="label">Score</div>
+          <div id="score" class="num">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Temps restant</div>
+          <div id="timer" class="num">30</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">Go!</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+        <div style="flex:1"></div>
+        <div id="best" style="font-weight:700; color:var(--muted)">Best: 0</div>
+      </div>
+
+      <div style="margin-top:12px; color:var(--muted); font-size:13px">Click le coeur le plus de fois possible en 30 secondes</div>
+
+    </div>
+
+    <div class="game-area panel">
+      <div class="arena" id="arena">
+        <div class="hud" id="hud">Get ready</div>
+        <!-- heart element inserted by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Basic game logic
+    const arena = document.getElementById('arena');
+    const scoreEl = document.getElementById('score');
+    const timerEl = document.getElementById('timer');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const hud = document.getElementById('hud');
+    const bestEl = document.getElementById('best');
+
+    let score = 0;
+    let timeLeft = 30;
+    let running = false;
+    let heartEl = null;
+    let moveInterval = null;
+    let countdownInterval = null;
+    let best = Number(localStorage.getItem('clickHeartBest')||0);
+    bestEl.textContent = 'Best: ' + best;
+
+    // Create heart node
+    function createHeart(){
+      const div = document.createElement('button');
+      div.className = 'heart';
+      div.setAttribute('aria-label','Heart target');
+      div.innerHTML = "❤️"
+
+      // click / touch
+      div.addEventListener('pointerdown', onHeartClick);
+      // accessibility: keyboard
+      div.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); onHeartClick(); } });
+      arena.appendChild(div);
+      return div;
+    }
+
+    function onHeartClick(e){
+      if(!running) return; // only count during game
+      // visual
+      heartEl.classList.remove('pop');
+      void heartEl.offsetWidth;
+      heartEl.classList.add('pop');
+
+      // score
+      score += 1;
+      scoreEl.textContent = score;
+
+      // sound
+      playClickTone();
+
+      // small particle
+      createParticle(e?.clientX || (heartEl._lastX||0) + 40, e?.clientY || (heartEl._lastY||0) + 40, '+1');
+
+      // move heart right away
+      moveHeartRandom(heartEl);
+    }
+
+    function createParticle(x,y,text){
+      const p = document.createElement('div');
+      p.className='particle';
+      p.style.left = (x - arena.getBoundingClientRect().left) + 'px';
+      p.style.top = (y - arena.getBoundingClientRect().top) + 'px';
+      p.textContent = text;
+      arena.appendChild(p);
+      setTimeout(()=> p.remove(), 900);
+    }
+
+    function randomPositionFor(el){
+      const pad = 10;
+      const aw = arena.clientWidth;
+      const ah = arena.clientHeight;
+      const ew = el.offsetWidth;
+      const eh = el.offsetHeight;
+      const x = Math.max(pad, Math.random() * (aw - ew - pad*2));
+      const y = Math.max(pad, Math.random() * (ah - eh - pad*2));
+      return {x,y};
+    }
+
+    function moveHeartRandom(el){
+      const pos = randomPositionFor(el);
+      el.style.left = pos.x + 'px';
+      el.style.top = pos.y + 'px';
+      el._lastX = pos.x; el._lastY = pos.y;
+    }
+
+    function startGame(){
+      if(running) return;
+      running = true;
+      score = 0; scoreEl.textContent = 0;
+      timeLeft = 30; timerEl.textContent = timeLeft;
+      hud.textContent = 'Go!';
+      startBtn.disabled = true;
+
+      if(!heartEl) heartEl = createHeart();
+      moveHeartRandom(heartEl);
+
+      // move heart every 700ms in case player misses
+      moveInterval = setInterval(()=>{
+        if(!running) return;
+        moveHeartRandom(heartEl);
+      }, 700);
+
+      // countdown
+      countdownInterval = setInterval(()=>{
+        timeLeft -= 1;
+        timerEl.textContent = timeLeft;
+        if(timeLeft <= 5) hud.textContent = 'Hurry!';
+        if(timeLeft <= 0) endGame();
+      }, 1000);
+    }
+
+    function endGame(){
+      running = false;
+      clearInterval(countdownInterval); countdownInterval = null;
+      clearInterval(moveInterval); moveInterval = null;
+      hud.textContent = "Time's up!";
+      startBtn.disabled = false;
+      // update best
+      if(score > best){ best = score; localStorage.setItem('clickHeartBest', String(best)); bestEl.textContent = 'Best: ' + best; }
+      // show final particles
+      createParticle(arena.clientWidth/2, arena.clientHeight/2, '🎉 ' + score);
+      // tiny bounce
+      if(heartEl) { heartEl.style.opacity = '0.9'; heartEl.classList.add('pop'); }
+
+      // short confetti-like effect (simple)
+      for(let i=0;i<8;i++){
+        setTimeout(()=>{
+          const cx = Math.random()*arena.clientWidth;
+          const cy = Math.random()*arena.clientHeight;
+          createParticle(cx, cy, '✦');
+        }, i*80);
+      }
+    }
+
+    function resetGame(){
+      running = false;
+      clearInterval(countdownInterval); countdownInterval=null;
+      clearInterval(moveInterval); moveInterval=null;
+      score = 0; scoreEl.textContent = 0;
+      timeLeft = 30; timerEl.textContent = 30;
+      hud.textContent = 'Ready';
+      startBtn.disabled = false;
+      if(heartEl){ heartEl.remove(); heartEl = null; }
+      // clear particles
+      document.querySelectorAll('.particle').forEach(n=>n.remove());
+    }
+
+    // small tone using WebAudio
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClickTone(){
+      try{
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sine';
+        o.frequency.value = 520 + Math.random()*80;
+        g.gain.value = 0.08;
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start();
+        o.stop(audioCtx.currentTime + 0.08);
+      }catch(e){ /* muted */ }
+    }
+
+    // hook up buttons
+    startBtn.addEventListener('click', ()=>{
+      // resume audio if needed (browsers require a user gesture)
+      if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+      startGame();
+    });
+    resetBtn.addEventListener('click', resetGame);
+
+    // ensure arena resizes keep heart inside
+    window.addEventListener('resize', ()=>{
+      if(heartEl){ moveHeartRandom(heartEl); }
+    });
+
+    // initial state
+    hud.textContent = 'Ready';
+
+    // allow quick play: tap start and then tap heart many times
+    // ensure mobile friendly viewport
+  </script>
+</body>
+</html>
